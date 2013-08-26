@@ -171,7 +171,9 @@ module DAV4Rack
       unless(resource.exist?)
         NotFound
       else
-        unless(request_document.xpath("//#{ns}propfind/#{ns}allprop").empty?)
+        # Per RFC 2518 §8.1
+        # An empty PROPFIND request body must be treated as a request for the names and values of all properties.
+        if !request_document.xpath("//#{ns}propfind/#{ns}allprop").empty? or (request.content_length == '0')
           properties = resource.properties
         else
           properties = (
@@ -187,8 +189,9 @@ module DAV4Rack
 
             to_element_hash(item)
           }
+
+          # We shouldn't ever be here.
           raise BadRequest if properties.empty?
-          properties = resource.properties if properties.empty?
         end
         multistatus do |xml|
           find_resources.each do |resource|
