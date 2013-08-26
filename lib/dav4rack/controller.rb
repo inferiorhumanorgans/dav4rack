@@ -215,11 +215,11 @@ module DAV4Rack
       else
         resource.lock_check
         prop_rem = request_document.xpath("/#{ns}propertyupdate/#{ns}remove/#{ns}prop/*").inject({}) do |ret, elem|
-          ret[to_element_hash(elem)] = elem.xpath('./*')
+          ret[to_element_hash(elem)] = elem.children
           ret
         end
         prop_set = request_document.xpath("/#{ns}propertyupdate/#{ns}set/#{ns}prop/*").inject({}) do |ret, elem|
-          ret[to_element_hash(elem)] = elem.xpath('./*')
+          ret[to_element_hash(elem)] = elem.children
           ret
          end
         multistatus do |xml|
@@ -410,7 +410,7 @@ module DAV4Rack
     
     # XML parsed request
     def request_document
-      @request_document ||= Nokogiri.XML(request.body.read)
+      @request_document ||= Nokogiri.XML(request.body.read, &:noblanks)
     rescue
       raise BadRequest
     end
