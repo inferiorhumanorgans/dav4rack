@@ -214,13 +214,12 @@ module DAV4Rack
         NotFound
       else
         resource.lock_check
-        prop_rem = request_document.xpath("/#{ns}propertyupdate/#{ns}remove/#{ns}prop").children.inject({}) do |ret, elem|
-          ret[to_element_key(elem)] = true
+        prop_rem = request_document.xpath("/#{ns}propertyupdate/#{ns}remove/#{ns}prop/*").inject({}) do |ret, elem|
+          ret[to_element_hash(elem)] = elem.xpath('./*')
           ret
         end
-        prop_set = request_document.xpath("/#{ns}propertyupdate/#{ns}set/#{ns}prop").children.inject({}) do |ret, elem|
-          href = elem.namespace.nil? ? nil : elem.namespace.href
-          ret[to_element_key(elem)] = true
+        prop_set = request_document.xpath("/#{ns}propertyupdate/#{ns}set/#{ns}prop/*").inject({}) do |ret, elem|
+          ret[to_element_hash(elem)] = elem.xpath('./*')
           ret
          end
         multistatus do |xml|
